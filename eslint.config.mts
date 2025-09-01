@@ -3,6 +3,9 @@ import globals from "globals";
 import tseslint from "typescript-eslint";
 
 export default [
+  {
+    ignores: ["**/node_modules/**", "**/dist/**", "**/build/**"],
+  },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
@@ -15,6 +18,5 @@ export default [
   },
   {
     files: ["**/*.{js,mjs,cjs,ts,mts,cts}"],
-    ignores: ["node_modules/**", "dist/**", "build/**"],
   },
 ];
