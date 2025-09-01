@@ -32,6 +32,9 @@ importers:
 
   apps/demo:
     dependencies:
+      '@built-in-ai/summarizer-api':
+        specifier: workspace:*
+        version: link:../../packages/summarizer-api
       vue:
         specifier: ^3.5.18
         version: 3.5.20(typescript@5.8.3)

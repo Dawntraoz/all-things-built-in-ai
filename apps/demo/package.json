@@ -16,7 +16,8 @@
     "type-check": "vue-tsc --build"
   },
   "dependencies": {
-    "vue": "^3.5.18"
+    "vue": "^3.5.18",
+    "@built-in-ai/summarizer-api": "workspace:*"
   },
   "devDependencies": {
     "@tsconfig/node22": "^22.0.2",
