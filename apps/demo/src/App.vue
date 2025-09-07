@@ -13,6 +13,7 @@ import {
 } from "lucide-vue-next";
 
 import SummarizerDemo from "./components/SummarizerDemo.vue";
+import TranslatorDemo from "./components/TranslatorDemo.vue";
 
 const builtInAiApis = {
   summarizer: {
@@ -26,7 +27,7 @@ const builtInAiApis = {
     description:
       "Translate text between different languages, by detecting the language first.",
     icon: Languages,
-    component: null,
+    component: TranslatorDemo,
   },
   prompt: {
     name: "Prompt API",
@@ -109,7 +110,7 @@ onClickOutside(modal, (event) => (isDemoOpen.value = false));
   </main>
 </template>
 
-<style scoped>
+<style>
 @reference "./assets/css/tailwind.css";
 
 .app-container {
@@ -130,5 +131,14 @@ onClickOutside(modal, (event) => (isDemoOpen.value = false));
 
 .app-modal-inner {
   @apply w-full max-w-5xl flex flex-col items-end p-12 bg-white rounded-lg border border-slate-100;
+}
+
+/** Form styles */
+textarea {
+  @apply block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500;
+}
+
+select {
+  @apply text-sm bg-gray-50 border border-gray-300 text-gray-900 rounded-lg outline-0 focus:border-blue-600 p-2;
 }
 </style>

@@ -170,14 +170,3 @@ async function summarize() {
     </form>
   </section>
 </template>
-
-<style scoped>
-@reference "../assets/css/tailwind.css";
-
-textarea {
-  @apply block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500;
-}
-select {
-  @apply text-sm bg-gray-50 border border-gray-300 text-gray-900 rounded-lg outline-0 focus:border-blue-600 p-2;
-}
-</style>

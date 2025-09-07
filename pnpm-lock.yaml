@@ -32,9 +32,15 @@ importers:
 
   apps/demo:
     dependencies:
+      '@built-in-ai/language-detector-api':
+        specifier: workspace:*
+        version: link:../../packages/language-detector-api
       '@built-in-ai/summarizer-api':
         specifier: workspace:*
         version: link:../../packages/summarizer-api
+      '@built-in-ai/translator-api':
+        specifier: workspace:*
+        version: link:../../packages/translator-api
       '@vueuse/core':
         specifier: ^13.9.0
         version: 13.9.0(vue@3.5.20(typescript@5.8.3))
