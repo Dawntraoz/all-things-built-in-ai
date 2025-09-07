@@ -2,12 +2,14 @@
 
 PNPM monorepo for Chrome's built-in AI APIs.
 
+> Requirements: Ensure that the necessary Chrome flags for on-device AI are enabled. In a new tab, type `chrome://flags` and search for every built-in AI API name. Make sure it is set to "Enabled.".
+
 ## Quick Start
 
 ```bash
 pnpm install
-pnpm build
 pnpm lint
+pnpm build
 ```
 
 ## Packages
@@ -20,11 +22,16 @@ pnpm lint
 - `@built-in-ai/language-detector-api` - Language Detector API wrapper
 - `@built-in-ai/proofreader-api` - Proofreader API wrapper
 
-## Scripts
+### Scripts
 
 ```bash
-pnpm build              # Build all packages
-pnpm type-check         # Type check all packages
-pnpm lint               # Lint all packages
-pnpm lint:fix           # Lint and fix all packages
+pnpm --filter <PACKAGE_WORKING_ON> dev  # Build package while making changes (--watch)
+pnpm build                              # Build all packages
+pnpm type-check                         # Type check all packages
+pnpm lint                               # Lint all packages
+pnpm lint:fix                           # Lint and fix all packages
 ```
+
+## Apps
+
+- `demo` - A Vue web app to showcase all packages
