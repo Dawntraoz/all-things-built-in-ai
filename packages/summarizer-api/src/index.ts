@@ -1,3 +1,5 @@
+import { checkAvailability } from '@built-in-ai/utils';
+
 /**
  * Summarizer API detailed options and response types
  */
@@ -24,33 +26,9 @@ export const SUMMARIZER_DEFAULT_OPTIONS = {
   length: 'short' as SummarizerOptionLength,
 };
 
-/**
- * Checks availability of the Summarizer API and model.
- */
-export async function checkSummarizerAvailability(): Promise<{ available: boolean; message: string }> {
-  if (!("Summarizer" in self)) {
-    return { available: false, message: 'Summarizer API is not available in this environment.' };
-  }
-
-  const availability = await Summarizer.availability();
-  if (availability === 'unavailable' || !availability) {
-    return { available: false, message: 'Summarizer model is unavailable.' };
-  }
-
-  if (availability === 'downloading') {
-    return { available: false, message: 'Summarizer model is downloading.' };
-  }
-
-  if (availability === 'downloadable') {
-    return { available: true, message: 'Summarizer model started downloading, please wait.' };
-  }
-
-  return { available: true, message: 'Summarizer model is ready to use.' };
-}
-
-const cachedSummarizer: Record<string, any> = {};
+const cachedSummarizer: Record<string, typeof Summarizer> = {};
 async function createSummarizerInstance(options: SummarizerOptions) {
-  const status = await checkSummarizerAvailability();
+  const status = await checkAvailability('Summarizer');
   if (!status.available) {
     throw new Error(status.message);
   }
@@ -80,13 +58,16 @@ export async function summarizeText(text: string, options: SummarizerOptions, co
 
 /**
  * Summarizes the provided text using the Summarizer API (Streaming mode).
- * Returns a ReadableStream of the summary result.
+ * Returns an async generator that yields chunks of the summary result.
  */
-export async function streamingSummarizeText(
+export async function* streamingSummarizeText(
   text: string,
   options: SummarizerOptions,
-  context?: string): Promise<ReadableStream<SummarizerResult>> {
+  context?: string) {
   await createSummarizerInstance(options);
 
-  return await cachedSummarizer[JSON.stringify(options)].summarizeStreaming(text, { context });
+  const stream = cachedSummarizer[JSON.stringify(options)].summarizeStreaming(text, { context });
+  for await (const chunk of stream) {
+    yield chunk;
+  }
 }

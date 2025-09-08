@@ -17,8 +17,8 @@ import type {
 const text = ref(
   `These documents collectively outline Chrome's built-in AI capabilities, specifically focusing on various client-side Web APIs powered by Gemini Nano. They detail the Prompt API for general language model interactions, including multimodal input (images, audio), and the Writing Assistance APIs (Writer, Rewriter, Summarizer, Proofreader) for content creation and refinement. Additionally, the Translation APIs (Translator, Language Detector) enable multilingual experiences directly within the browser. The sources emphasise best practices for developers, covering aspects such as session management, efficient rendering of streamed responses, caching AI models, and debugging techniques, while also addressing security concerns and promoting a hybrid AI approach with server-side fallbacks like Firebase AI Logic.`
 );
-const summary = ref<string | null>(null);
-const errorMessage = ref<string | null>(null);
+const summary = ref();
+const errorMessage = ref();
 const isLoading = ref(false);
 
 /**
@@ -34,9 +34,11 @@ const isStreaming = ref(false);
 
 async function summarize() {
   if (!text.value) return;
+
   isLoading.value = true;
-  errorMessage.value = null;
-  summary.value = null;
+  errorMessage.value = undefined;
+  summary.value = undefined;
+
   try {
     if (!isStreaming.value) {
       summary.value = await summarizeText(text.value ?? "", {
@@ -46,29 +48,15 @@ async function summarize() {
         format: format.value,
       });
     } else {
-      const stream = await streamingSummarizeText(text.value ?? "", {
+      let result = "";
+      for await (const chunk of streamingSummarizeText(text.value ?? "", {
         sharedContext: sharedContext.value,
         type: type.value,
         length: length.value,
         format: format.value,
-      });
-      const reader = stream.getReader();
-      const decoder = new TextDecoder();
-      let done = false;
-      let result = "";
-      while (!done) {
-        const { value, done: doneReading } = await reader.read();
-        done = doneReading;
-        if (value) {
-          // If value is a string, convert to Uint8Array; otherwise, decode directly
-          if (typeof value === "string") {
-            const uint8Value = new TextEncoder().encode(value);
-            result += decoder.decode(uint8Value);
-          } else {
-            result += decoder.decode(value);
-          }
-          summary.value = result; // Update the summary as we receive chunks
-        }
+      })) {
+        result += String(chunk);
+        summary.value = result; // Update the summary as we receive chunks
       }
     }
   } catch (error) {
@@ -80,18 +68,18 @@ async function summarize() {
 }
 </script>
 <template>
-  <section class="flex flex-col items-center">
-    <h2 class="uppercase text-xl font-semibold py-4">
-      Built-in AI Summarizer capabilities demo
-    </h2>
+  <section class="flex flex-col items-center gap-6">
+    <h2 class="text-3xl font-bold text-center">Summarizer API demo</h2>
     <form class="w-full flex gap-6">
-      <p v-if="errorMessage">{{ errorMessage }}</p>
       <fieldset class="flex flex-col gap-4 flex-1">
+        <p
+          v-if="errorMessage"
+          class="text-red-500 text-sm bg-red-50 rounded-md p-2"
+        >
+          {{ errorMessage }}
+        </p>
         <div class="flex flex-col gap-3">
-          <label
-            for="text-to-summarize"
-            class="block text-lg font-medium text-gray-900"
-          >
+          <label for="text-to-summarize" class="text-lg text-slate-950">
             Text to summarize
           </label>
           <textarea
@@ -102,7 +90,7 @@ async function summarize() {
           ></textarea>
         </div>
         <div class="flex flex-col gap-3">
-          <label for="context" class="block text-lg font-medium text-gray-900">
+          <label for="context" class="text-lg text-slate-950">
             Shared context
           </label>
           <textarea id="context" rows="2" v-model="sharedContext" />
@@ -114,13 +102,16 @@ async function summarize() {
         >
           {{ isLoading ? "Summarizing..." : "Summarize" }}
         </button>
-        <div class="flex flex-col gap-2 py-4 border-t border-slate-200">
-          <h3 class="text-lg font-medium text-gray-900">Generated summary</h3>
-          <p v-if="summary">{{ summary }}</p>
+        <div class="flex flex-col gap-2 py-4 border-t border-slate-100">
+          <h3 class="text-lg text-slate-950">Generated summary</h3>
+          <p v-if="summary" class="text-slate-500">{{ summary }}</p>
+          <p v-else class="text-slate-400">
+            Here's where your summary will appear...
+          </p>
         </div>
       </fieldset>
       <fieldset
-        class="w-56 border border-slate-200 rounded-lg p-4 flex flex-col gap-2"
+        class="w-56 bg-white border border-slate-200 rounded-lg p-4 flex flex-col gap-2"
       >
         <legend class="px-2">Options</legend>
         <div class="flex flex-col gap-2">
@@ -155,16 +146,22 @@ async function summarize() {
             </option>
           </select>
         </div>
-        <div class="flex items-center gap-2 py-2">
-          <input
-            type="checkbox"
-            id="streaming-summarize"
-            class="accent-blue-600 w-4 h-4 bg-slate-50 border-slate-100 rounded-sm focus:ring-2 focus:ring-blue-500"
-            v-model="isStreaming"
-          />
-          <label for="streaming-summarize" class="ms-2 text-gray-900"
-            >Streaming</label
+        <div class="py-2">
+          <label
+            for="streaming-summarize"
+            class="flex items-center justify-between cursor-pointer"
           >
+            <input
+              id="streaming-summarize"
+              type="checkbox"
+              v-model="isStreaming"
+              class="sr-only peer"
+            />
+            <div
+              class="relative w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"
+            ></div>
+            <span class="ms-3 text-slate-950">streaming</span>
+          </label>
         </div>
       </fieldset>
     </form>

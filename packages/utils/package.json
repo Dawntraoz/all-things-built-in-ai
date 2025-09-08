@@ -1,7 +1,8 @@
 {
-  "name": "@built-in-ai/language-detector-api",
+  "name": "@built-in-ai/utils",
   "version": "1.0.0",
-  "description": "Language Detector API for detecting the language of a given text using browser built-in AI models.",
+  "type": "module",
+  "description": "Utility functions and types for built-in AI packages.",
   "main": "dist/index.js",
   "files": [
     "dist"
@@ -14,15 +15,11 @@
     "lint:fix": "eslint . --fix"
   },
   "keywords": [
-    "language detector",
-    "text detection",
+    "utils",
     "AI",
     "API"
   ],
   "author": "Alba Silvente (@dawntraoz)",
   "license": "ISC",
-  "private": true,
-  "dependencies": {
-    "@built-in-ai/utils": "workspace:*"
-  }
+  "private": true
 }

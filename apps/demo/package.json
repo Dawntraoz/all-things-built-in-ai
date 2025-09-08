@@ -19,6 +19,10 @@
     "@built-in-ai/summarizer-api": "workspace:*",
     "@built-in-ai/language-detector-api": "workspace:*",
     "@built-in-ai/translator-api": "workspace:*",
+    "@built-in-ai/prompt-api": "workspace:*",
+    "@built-in-ai/writer-api": "workspace:*",
+    "@built-in-ai/rewriter-api": "workspace:*",
+    "@built-in-ai/proofreader-api": "workspace:*",
     "@vueuse/core": "^13.9.0",
     "lucide-vue-next": "^0.542.0",
     "vue": "^3.5.18"

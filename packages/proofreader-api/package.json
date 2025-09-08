@@ -1,8 +1,11 @@
 {
   "name": "@built-in-ai/proofreader-api",
   "version": "1.0.0",
-  "description": "",
+  "description": "Proofreader API for text correction using browser built-in AI models.",
   "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "dev": "tsc --watch",
     "build": "tsc",
@@ -10,8 +13,16 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "proofreader",
+    "text correction",
+    "AI",
+    "API"
+  ],
+  "author": "Alba Silvente (@dawntraoz)",
   "license": "ISC",
-  "private": true
+  "private": true,
+  "dependencies": {
+    "@built-in-ai/utils": "workspace:*"
+  }
 }

@@ -35,12 +35,24 @@ importers:
       '@built-in-ai/language-detector-api':
         specifier: workspace:*
         version: link:../../packages/language-detector-api
+      '@built-in-ai/prompt-api':
+        specifier: workspace:*
+        version: link:../../packages/prompt-api
+      '@built-in-ai/proofreader-api':
+        specifier: workspace:*
+        version: link:../../packages/proofreader-api
+      '@built-in-ai/rewriter-api':
+        specifier: workspace:*
+        version: link:../../packages/rewriter-api
       '@built-in-ai/summarizer-api':
         specifier: workspace:*
         version: link:../../packages/summarizer-api
       '@built-in-ai/translator-api':
         specifier: workspace:*
         version: link:../../packages/translator-api
+      '@built-in-ai/writer-api':
+        specifier: workspace:*
+        version: link:../../packages/writer-api
       '@vueuse/core':
         specifier: ^13.9.0
         version: 13.9.0(vue@3.5.20(typescript@5.8.3))
@@ -85,19 +97,49 @@ importers:
         specifier: ^3.0.4
         version: 3.0.6(typescript@5.8.3)
 
-  packages/language-detector-api: {}
+  packages/language-detector-api:
+    dependencies:
+      '@built-in-ai/utils':
+        specifier: workspace:*
+        version: link:../utils
 
-  packages/prompt-api: {}
+  packages/prompt-api:
+    dependencies:
+      '@built-in-ai/utils':
+        specifier: workspace:*
+        version: link:../utils
 
-  packages/proofreader-api: {}
+  packages/proofreader-api:
+    dependencies:
+      '@built-in-ai/utils':
+        specifier: workspace:*
+        version: link:../utils
 
-  packages/rewriter-api: {}
+  packages/rewriter-api:
+    dependencies:
+      '@built-in-ai/utils':
+        specifier: workspace:*
+        version: link:../utils
 
-  packages/summarizer-api: {}
+  packages/summarizer-api:
+    dependencies:
+      '@built-in-ai/utils':
+        specifier: workspace:*
+        version: link:../utils
 
-  packages/translator-api: {}
+  packages/translator-api:
+    dependencies:
+      '@built-in-ai/utils':
+        specifier: workspace:*
+        version: link:../utils
 
-  packages/writer-api: {}
+  packages/utils: {}
+
+  packages/writer-api:
+    dependencies:
+      '@built-in-ai/utils':
+        specifier: workspace:*
+        version: link:../utils
 
 packages:
 

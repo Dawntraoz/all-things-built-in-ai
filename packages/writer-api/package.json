@@ -1,8 +1,11 @@
 {
   "name": "@built-in-ai/writer-api",
   "version": "1.0.0",
-  "description": "",
+  "description": "Writer API for text generation using browser built-in AI models.",
   "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "dev": "tsc --watch",
     "build": "tsc",
@@ -10,8 +13,16 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "writer",
+    "text generation",
+    "AI",
+    "API"
+  ],
+  "author": "Alba Silvente (@dawntraoz)",
   "license": "ISC",
-  "private": true
+  "private": true,
+  "dependencies": {
+    "@built-in-ai/utils": "workspace:*"
+  }
 }
