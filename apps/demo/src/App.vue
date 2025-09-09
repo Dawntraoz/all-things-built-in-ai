@@ -33,12 +33,6 @@ const builtInAiApis = {
     icon: Languages,
     component: TranslatorDemo,
   },
-  prompt: {
-    name: "Prompt API",
-    description: "Generate text based on a given prompt.",
-    icon: FlaskConical,
-    component: PromptDemo,
-  },
   writer: {
     name: "Writer API",
     description: "Generate long-form content based on a given topic.",
@@ -50,6 +44,12 @@ const builtInAiApis = {
     description: "Rewrite text to improve clarity, style, or tone.",
     icon: RefreshCcw,
     component: RewriterDemo,
+  },
+  prompt: {
+    name: "Prompt API",
+    description: "Generate text based on a given prompt.",
+    icon: FlaskConical,
+    component: PromptDemo,
   },
   proofreader: {
     name: "Proofreader API",
@@ -143,6 +143,10 @@ onClickOutside(modal, (event) => (isDemoOpen.value = false));
 }
 
 /** Form styles */
+input[type="text"] {
+  @apply bg-white border-2 border-slate-100 text-slate-950 rounded-lg focus:outline-0 focus:border-blue-600 py-1 px-2;
+}
+
 textarea {
   @apply block p-4 w-full text-slate-500 bg-white rounded-lg border-2 border-slate-100 focus:outline-0 focus:ring-blue-500 focus:border-blue-500;
 }

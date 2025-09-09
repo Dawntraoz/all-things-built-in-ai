@@ -40,15 +40,17 @@ async function handleRewriteText() {
   abortController.value = new AbortController();
 
   try {
+    const rewriterOptions = {
+      sharedContext: sharedContext.value,
+      tone: tone.value,
+      length: length.value,
+      format: format.value,
+    };
+
     if (!isStreaming.value) {
       output.value = await rewriteText(
         input.value ?? "",
-        {
-          sharedContext: sharedContext.value,
-          tone: tone.value,
-          length: length.value,
-          format: format.value,
-        },
+        rewriterOptions,
         inputContext.value,
         abortController.value.signal
       );
@@ -56,12 +58,7 @@ async function handleRewriteText() {
       let result = "";
       for await (const chunk of streamingRewriteText(
         input.value ?? "",
-        {
-          sharedContext: sharedContext.value,
-          tone: tone.value,
-          length: length.value,
-          format: format.value,
-        },
+        rewriterOptions,
         inputContext.value,
         abortController.value.signal
       )) {
@@ -89,12 +86,6 @@ function abortWriting() {
     <h2 class="text-3xl font-bold text-center">Rewriter API demo</h2>
     <form class="w-full flex gap-6">
       <fieldset class="flex flex-col gap-4 flex-1">
-        <p
-          v-if="errorMessage"
-          class="text-red-500 text-sm bg-red-50 rounded-md p-2"
-        >
-          {{ errorMessage }}
-        </p>
         <div class="flex flex-col gap-3">
           <label for="topic-to-rewrite" class="text-lg text-slate-950">
             Topic to rewrite about
@@ -127,6 +118,10 @@ function abortWriting() {
         <div class="flex flex-col gap-2 py-4 border-t border-slate-100">
           <h3 class="text-lg text-slate-950">Rewritten text</h3>
           <p v-if="output" class="text-slate-500">{{ output }}</p>
+          <p v-else-if="isLoading" class="text-blue-500">Rewriting...</p>
+          <p v-else-if="errorMessage" class="text-red-500">
+            An error occurred during rewriting: {{ errorMessage }}
+          </p>
           <p v-else class="text-slate-400">
             Here's where your rewritten text will appear...
           </p>

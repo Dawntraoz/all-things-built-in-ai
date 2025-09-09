@@ -30,6 +30,10 @@ const sharedContext = ref(
 const type = ref<SummarizerOptionType>(SUMMARIZER_DEFAULT_OPTIONS.type);
 const length = ref<SummarizerOptionLength>(SUMMARIZER_DEFAULT_OPTIONS.length);
 const format = ref<SummarizerOptionFormat>(SUMMARIZER_DEFAULT_OPTIONS.format);
+const expectedInputLanguages = ref(
+  SUMMARIZER_DEFAULT_OPTIONS.expectedInputLanguages.join(", ")
+);
+const outputLanguage = ref(SUMMARIZER_DEFAULT_OPTIONS.outputLanguage);
 const isStreaming = ref(false);
 
 async function summarize() {
@@ -40,21 +44,24 @@ async function summarize() {
   summary.value = undefined;
 
   try {
+    const summarizerOptions = {
+      sharedContext: sharedContext.value,
+      type: type.value,
+      length: length.value,
+      format: format.value,
+      expectedInputLanguages: expectedInputLanguages.value
+        ? expectedInputLanguages.value.split(",").map((lang) => lang.trim())
+        : [],
+      outputLanguage: outputLanguage.value,
+    };
     if (!isStreaming.value) {
-      summary.value = await summarizeText(text.value ?? "", {
-        sharedContext: sharedContext.value,
-        type: type.value,
-        length: length.value,
-        format: format.value,
-      });
+      summary.value = await summarizeText(text.value ?? "", summarizerOptions);
     } else {
       let result = "";
-      for await (const chunk of streamingSummarizeText(text.value ?? "", {
-        sharedContext: sharedContext.value,
-        type: type.value,
-        length: length.value,
-        format: format.value,
-      })) {
+      for await (const chunk of streamingSummarizeText(
+        text.value ?? "",
+        summarizerOptions
+      )) {
         result += String(chunk);
         summary.value = result; // Update the summary as we receive chunks
       }
@@ -72,12 +79,6 @@ async function summarize() {
     <h2 class="text-3xl font-bold text-center">Summarizer API demo</h2>
     <form class="w-full flex gap-6">
       <fieldset class="flex flex-col gap-4 flex-1">
-        <p
-          v-if="errorMessage"
-          class="text-red-500 text-sm bg-red-50 rounded-md p-2"
-        >
-          {{ errorMessage }}
-        </p>
         <div class="flex flex-col gap-3">
           <label for="text-to-summarize" class="text-lg text-slate-950">
             Text to summarize
@@ -105,6 +106,10 @@ async function summarize() {
         <div class="flex flex-col gap-2 py-4 border-t border-slate-100">
           <h3 class="text-lg text-slate-950">Generated summary</h3>
           <p v-if="summary" class="text-slate-500">{{ summary }}</p>
+          <p v-else-if="isLoading" class="text-blue-500">Summarizing...</p>
+          <p v-else-if="errorMessage" class="text-red-500">
+            An error occurred during summarization: {{ errorMessage }}
+          </p>
           <p v-else class="text-slate-400">
             Here's where your summary will appear...
           </p>
@@ -145,6 +150,22 @@ async function summarize() {
               {{ format }}
             </option>
           </select>
+        </div>
+        <div class="flex flex-col gap-2">
+          <label for="summarizer-expected-languages">Expected languages</label>
+          <input
+            id="summarizer-expected-languages"
+            type="text"
+            v-model="expectedInputLanguages"
+          />
+        </div>
+        <div class="flex flex-col gap-2">
+          <label for="summarizer-output-language">Output language</label>
+          <input
+            id="summarizer-output-language"
+            type="text"
+            v-model="outputLanguage"
+          />
         </div>
         <div class="py-2">
           <label

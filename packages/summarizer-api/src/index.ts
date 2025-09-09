@@ -11,6 +11,8 @@ export type SummarizerOptions = Partial<{
   type: SummarizerOptionType;
   format: SummarizerOptionFormat;
   length: SummarizerOptionLength;
+  expectedInputLanguages: string[];
+  outputLanguage: string;
 }>;
 export type SummarizerResult = string;
 
@@ -24,6 +26,8 @@ export const SUMMARIZER_DEFAULT_OPTIONS = {
   type: 'tldr' as SummarizerOptionType,
   format: 'plain-text' as SummarizerOptionFormat,
   length: 'short' as SummarizerOptionLength,
+  expectedInputLanguages: ['en'],
+  outputLanguage: 'en',
 };
 
 const cachedSummarizer: Record<string, typeof Summarizer> = {};

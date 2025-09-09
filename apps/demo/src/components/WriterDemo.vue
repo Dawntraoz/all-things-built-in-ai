@@ -42,15 +42,17 @@ async function handleWriteText() {
   abortController.value = new AbortController();
 
   try {
+    const writerOptions = {
+      sharedContext: sharedContext.value,
+      tone: tone.value,
+      length: length.value,
+      format: format.value,
+    };
+
     if (!isStreaming.value) {
       output.value = await writeText(
         input.value ?? "",
-        {
-          sharedContext: sharedContext.value,
-          tone: tone.value,
-          length: length.value,
-          format: format.value,
-        },
+        writerOptions,
         inputContext.value,
         abortController.value.signal
       );
@@ -58,12 +60,7 @@ async function handleWriteText() {
       let result = "";
       for await (const chunk of streamingWriteText(
         input.value ?? "",
-        {
-          sharedContext: sharedContext.value,
-          tone: tone.value,
-          length: length.value,
-          format: format.value,
-        },
+        writerOptions,
         inputContext.value,
         abortController.value.signal
       )) {
@@ -91,12 +88,6 @@ function abortWriting() {
     <h2 class="text-3xl font-bold text-center">Writer API demo</h2>
     <form class="w-full flex gap-6">
       <fieldset class="flex flex-col gap-4 flex-1">
-        <p
-          v-if="errorMessage"
-          class="text-red-500 text-sm bg-red-50 rounded-md p-2"
-        >
-          {{ errorMessage }}
-        </p>
         <div class="flex flex-col gap-3">
           <label for="topic-to-write" class="text-lg text-slate-950">
             Topic to write about
@@ -129,6 +120,10 @@ function abortWriting() {
         <div class="flex flex-col gap-2 py-4 border-t border-slate-100">
           <h3 class="text-lg text-slate-950">Generated text</h3>
           <p v-if="output" class="text-slate-500">{{ output }}</p>
+          <p v-else-if="isLoading" class="text-blue-500">Writing...</p>
+          <p v-else-if="errorMessage" class="text-red-500">
+            An error occurred during writing: {{ errorMessage }}
+          </p>
           <p v-else class="text-slate-400">
             Here's where your generated text will appear...
           </p>

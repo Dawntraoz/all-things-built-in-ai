@@ -9,10 +9,10 @@ import {
 } from "@built-in-ai/translator-api";
 
 const inputText = ref("Bonjour tout le monde");
-const errorMessage = ref<string | undefined>();
+const errorMessage = ref();
 const isLoading = ref(false);
-const detectedLanguage = ref<string | undefined>();
-const translatedText = ref<string | undefined>();
+const detectedLanguage = ref();
+const translatedText = ref();
 
 const targetLanguage = ref("en");
 const isStreaming = ref(false);
@@ -29,17 +29,22 @@ async function handleTranslateLanguage() {
     );
     detectedLanguage.value = detectionResult[0].detectedLanguage;
 
+    const translatorOptions = {
+      sourceLanguage: detectedLanguage.value,
+      targetLanguage: targetLanguage.value,
+    };
+
     if (!isStreaming.value) {
-      translatedText.value = await translateText(inputText.value, {
-        sourceLanguage: detectedLanguage.value,
-        targetLanguage: targetLanguage.value,
-      });
+      translatedText.value = await translateText(
+        inputText.value,
+        translatorOptions
+      );
     } else {
       let result = "";
-      for await (const chunk of streamingTranslateText(inputText.value, {
-        sourceLanguage: detectedLanguage.value,
-        targetLanguage: targetLanguage.value,
-      })) {
+      for await (const chunk of streamingTranslateText(
+        inputText.value,
+        translatorOptions
+      )) {
         result += String(chunk);
         translatedText.value = result;
       }
@@ -61,12 +66,6 @@ async function handleTranslateLanguage() {
 
     <form class="w-full flex gap-6">
       <fieldset class="flex flex-col gap-4 flex-1">
-        <p
-          v-if="errorMessage"
-          class="text-red-500 text-sm bg-red-50 rounded-md p-2"
-        >
-          {{ errorMessage }}
-        </p>
         <div class="flex flex-col gap-3">
           <label for="text-to-translate" class="text-lg text-slate-950">
             Text to translate
@@ -87,20 +86,25 @@ async function handleTranslateLanguage() {
           {{ isLoading ? "Translating..." : "Translate text" }}
         </button>
 
-        <div class="flex items-center gap-2 pt-4 border-t border-slate-200">
+        <div class="flex items-center gap-3 pt-4 border-t border-slate-200">
           <h3 class="text-lg text-slate-950">Detected Language</h3>
-          <p v-if="detectedLanguage" class="text-slate-500">
-            {{ detectedLanguage }}
-          </p>
-          <p v-else class="text-slate-400">
-            Here's where your detected language will appear...
+          <p
+            class="uppercase bg-white py-1 px-2 rounded-md border border-slate-100 text-slate-700"
+          >
+            {{ detectedLanguage ?? "?" }}
           </p>
         </div>
 
-        <div>
+        <div class="flex flex-col gap-2">
           <h3 class="text-lg text-slate-950">Translated Text</h3>
           <p v-if="translatedText" class="text-slate-500">
             {{ translatedText }}
+          </p>
+          <p v-else-if="isLoading" class="text-blue-500">
+            Downloading and translating...
+          </p>
+          <p v-else-if="errorMessage" class="text-red-500">
+            An error occurred during translation: {{ errorMessage }}
           </p>
           <p v-else class="text-slate-400">
             Here's where your translated text will appear...
