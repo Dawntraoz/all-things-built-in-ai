@@ -7,6 +7,7 @@ export type PromptSessionOptions = Partial<{
   topK: number;
   signal: AbortSignal;
 }>;
+export type PromptInput = { role: string, content: { type: 'text' | 'image', value: string | Blob }[] }
 export type PromptResult = string;
 
 const cachedPrompt: Record<string, typeof LanguageModel> = {};
@@ -17,8 +18,10 @@ async function createPromptInstance(options: PromptSessionOptions = {}): Promise
   }
   const modelKey = JSON.stringify(options);
   if (!cachedPrompt[modelKey]) {
+    // @ToDo: Add params as limits to the options topK, temperature, etc.
     cachedPrompt[modelKey] = await LanguageModel.create({
       ...options,
+      expectedInputs: [{ type: 'text' }, { type: 'image' }],
       monitor(m: EventTarget) {
         m.addEventListener("downloadprogress", (event) => {
           const progressEvent = event as ProgressEvent;
@@ -29,13 +32,13 @@ async function createPromptInstance(options: PromptSessionOptions = {}): Promise
   }
 }
 
-export async function promptText(input: string, options: PromptSessionOptions, signal?: AbortSignal): Promise<PromptResult> {
+export async function promptText(input: PromptInput[], options: PromptSessionOptions, signal?: AbortSignal): Promise<PromptResult> {
   await createPromptInstance(options);
 
   return await cachedPrompt[JSON.stringify(options)].prompt(input, { signal });
 }
 
-export async function* streamingPromptText(input: string, options: PromptSessionOptions, signal?: AbortSignal) {
+export async function* streamingPromptText(input: PromptInput[], options: PromptSessionOptions, signal?: AbortSignal) {
   await createPromptInstance(options);
 
   const stream = cachedPrompt[JSON.stringify(options)].promptStreaming(input, { signal });
@@ -45,5 +48,5 @@ export async function* streamingPromptText(input: string, options: PromptSession
 }
 
 // -------------
-// @ToDo: 1. Add structured prompt support (responseConstraint), 2. Multimodal capabilities, 3. Clone a session, 4. Terminate a session
+// @ToDo: 1. Add structured prompt support (responseConstraint), 2. Multimodal capabilities for audio, 3. Clone a session, 4. Terminate a session
 // -------------

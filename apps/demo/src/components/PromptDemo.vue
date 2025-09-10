@@ -2,16 +2,20 @@
 import { ref } from "vue";
 import { StopCircle } from "lucide-vue-next";
 import { promptText, streamingPromptText } from "@built-in-ai/prompt-api";
+import type { PromptInput } from "@built-in-ai/prompt-api";
 
 const errorMessage = ref();
 const isLoading = ref(false);
 
-const promptInput = ref("");
+const promptInput = ref(
+  "How can I dress appropietly for the kind of audience shown in the picture below:"
+);
+const promptImage = ref();
 const systemPrompt = ref(
   "You are a friendly, helpful assistant specialized in clothing choices."
 );
 const isStreaming = ref(false);
-const isStructured = ref(false);
+// const isStructured = ref(false);
 
 const isOpenHistory = ref(false);
 
@@ -29,56 +33,63 @@ async function runPrompt() {
     const promptSessionOptions = {
       initialPrompts: [{ role: "system", content: systemPrompt.value }],
     };
+    const multimodalPromptInput: PromptInput[] = [
+      {
+        role: "user",
+        content: [
+          {
+            type: "text",
+            value: promptInput.value,
+          },
+        ],
+      },
+    ];
 
-    if (!isStreaming.value && !isStructured.value) {
+    if (promptImage.value) {
+      multimodalPromptInput[0].content.push({
+        type: "image",
+        value: promptImage.value,
+      });
+    }
+
+    if (!isStreaming.value) {
       output.value = await promptText(
-        promptInput.value,
+        multimodalPromptInput,
         promptSessionOptions,
         abortController.value.signal
       );
     } else if (isStreaming.value) {
       let result = "";
       for await (const chunk of streamingPromptText(
-        promptInput.value,
+        multimodalPromptInput,
         promptSessionOptions,
         abortController.value.signal
       )) {
         result += String(chunk);
         output.value = result;
       }
-    } else if (isStructured.value) {
-      const exampleSchema = {
-        type: "object",
-        properties: {
-          name: { type: "string" },
-          age: { type: "number" },
-        },
-        required: ["name", "age"],
-      };
-      try {
-        const result = await promptText(
-          promptInput.value,
-          promptSessionOptions,
-          abortController.value.signal
-        );
-        output.value = JSON.stringify(JSON.parse(result), null, 2);
-      } catch (err) {
-        output.value = "[error] " + (err as Error).message;
-      }
     }
-    if (!isStructured.value) {
-      chatHistory.value.push({ role: "user", content: promptInput.value });
-      chatHistory.value.push({
-        role: "assistant",
-        content: output.value ?? "",
-      });
-    }
+
+    chatHistory.value.push({ role: "user", content: promptInput.value });
+    chatHistory.value.push({
+      role: "assistant",
+      content: output.value ?? "",
+    });
   } catch (error) {
     errorMessage.value = "Error during prompt: " + error;
     console.error("Error during prompt:", error);
   } finally {
     isLoading.value = false;
     abortController.value = undefined;
+  }
+}
+
+function handlePromptImage(event: Event) {
+  const files = (event.target as HTMLInputElement).files;
+  if (files && files.length > 0) {
+    promptImage.value = files[0];
+  } else {
+    promptImage.value = undefined;
   }
 }
 
@@ -110,6 +121,22 @@ function abortPrompting() {
             placeholder="Enter prompt or messages (string or JSON array)"
             v-model="promptInput"
           ></textarea>
+        </div>
+        <div class="flex flex-col gap-2">
+          <label for="prompt-image" class="text-lg text-slate-950 pb-1">
+            Add an image (optional)
+          </label>
+          <input
+            id="prompt-image"
+            type="file"
+            accept="image/*"
+            class="text-slate-950 border border-slate-300 rounded-lg file:cursor-pointer bg-slate-50 focus:outline-none file:bg-slate-950 file:text-slate-50 file:p-2"
+            aria-describedby="prompt-image-helper"
+            @change="handlePromptImage"
+          />
+          <p id="prompt-image-helper" class="text-slate-500">
+            Upload an image to include it in the prompt input.
+          </p>
         </div>
         <div class="flex flex-col gap-3">
           <label for="system-prompt" class="text-lg text-slate-950">
@@ -171,7 +198,7 @@ function abortPrompting() {
           ></div>
           <span class="ms-3 text-slate-950">streaming</span>
         </label>
-        <label
+        <!-- <label
           for="structured-prompt"
           class="flex items-center justify-between cursor-pointer"
         >
@@ -187,7 +214,7 @@ function abortPrompting() {
           <span class="ms-3 text-slate-950 truncate"
             >structured (JSON Schema)</span
           >
-        </label>
+        </label> -->
       </fieldset>
     </form>
   </section>
