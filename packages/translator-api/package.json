@@ -20,7 +20,7 @@
     "API"
   ],
   "author": "Alba Silvente (@dawntraoz)",
-  "license": "ISC",
+  "license": "MIT",
   "private": true,
   "dependencies": {
     "@built-in-ai/utils": "workspace:*"
